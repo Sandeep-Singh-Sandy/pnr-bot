@@ -1,0 +1,20 @@
+{
+  "name": "pnr_checker_bot",
+  "version": "1.0.0",
+  "description": "Check your PNR Status here",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Sandeep Singh",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "node-telegram-bot-api": "^0.60.0"
+  },
+  "engines": {
+    "node": "16.x"
+  }
+}
