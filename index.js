@@ -2,7 +2,8 @@ const request = require('request');
 const TelegramBot = require('node-telegram-bot-api');
 const dotenv = require('dotenv').config({ path: process.cwd()+'/config/config.env' });
 const bot = new TelegramBot(process.env.token, {polling: true});
-const path = require('path')
+const path = require('path');
+const axios = require('axios')
 bot.onText(/\/start/,(msg,match)=>{
   const opts = {
     reply_to_message_id: msg.message_id,
@@ -10,8 +11,12 @@ bot.onText(/\/start/,(msg,match)=>{
 };
   bot.sendMessage(msg.chat.id,"Enter PNR Number to check status",opts)
 });
-
-
+const TELEGRAM_API = 'https://api.telegram.org/bot5781386859:AAFD7kDv6O6LZwPZmciPGIrMPFLCZq92Mcs';
+const webhookURL = 'https://three-owls-tell-49-36-180-239.loca.lt/';
+const setupWebhook =  axios.get(`${TELEGRAM_API}/setWebhook?url=${webhookURL}&drop_pending_updates=true`)
+console.log(setupWebhook.then((data)=>{
+  console.log(data)
+}));
 bot.onText(/([0-9]{10})/,(msg,match)=>{
   const options = {
     method: 'GET',
