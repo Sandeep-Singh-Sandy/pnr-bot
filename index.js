@@ -1,10 +1,10 @@
+const express = require('express');
+const app = express();
 const request = require('request');
 const TelegramBot = require('node-telegram-bot-api');
-const dotenv = require('dotenv').config({ path: process.cwd()+'/config/config.env' });
+require('dotenv').config({ path: process.cwd()+'/config/config.env' });
 const bot = new TelegramBot(process.env.token, {polling: true});
 const path = require('path');
-const axios = require('axios')
-bot.setWebHook('https://eighty-signs-trade-49-36-180-239.loca.lt');
 bot.onText(/\/start/,(msg,match)=>{
   const opts = {
     reply_to_message_id: msg.message_id,
@@ -15,28 +15,30 @@ bot.onText(/\/start/,(msg,match)=>{
 bot.onText(/([0-9]{10})/,(msg,match)=>{
   const options = {
     method: 'GET',
-    url: `https://pnr-status-indian-railway.p.rapidapi.com/pnr-check/${msg.text}`,
+    url: `${process.env.link}${msg.text}`,
     headers: {
-      'X-RapidAPI-Key': '87a80b466dmsh924448c924c3311p155a2ajsn7b4c4cef9d7b',
-      'X-RapidAPI-Host': 'pnr-status-indian-railway.p.rapidapi.com',
-      useQueryString: true
+      'x-rapidapi-key': process.env.api,
+      'x-rapidapi-host': process.env.host,
     }
   };
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
   
     const test = JSON.parse(body);
-    if (test.code==200){
+    if (test.status==true){
     let msgTemplate = `
-    Train Id : ${test.data.boardingInfo.trainId}
-    Train:${test.data.trainInfo.name}
-    Date:${test.data.trainInfo.dt}
-    Boarding Station: ${test.data.boardingInfo.stationName}
-    Departure Time: ${test.data.boardingInfo.departureTime}
-    Destination station: ${test.data.destinationInfo.stationName}
-    Coach:${test.data.seatInfo.coach}
-    Bearth: ${test.data.seatInfo.berth}`
-    // bot.sendMessage(msg.chat.id,msgTemplate);
+    Train Id : ${test.data.TrainNo}
+    Train:${test.data.TrainName}
+    Class"${test.data.Class}
+    Date:${test.data.Doj}
+    Expected Platform No: ${test.data.ExpectedPlatformNo}
+    Boarding Station: ${test.data.BoardingStationName}
+    Departure Time: ${test.data.DepartureTime}
+    Destination station: ${test.data.ReservationUptoName}
+    Booking Status:${test.data.PassengerStatus[0].BookingStatus}
+    Reservation Upto : ${test.data.ReservationUptoName}
+    Current Status: ${test.data.PassengerStatus[0].CurrentStatus}
+    Chart Prepared: ${test.data.ChartPrepared?"Yes":"No"}`
     const photo = path.join(process.cwd()+'/static/train.jpg')
     bot.sendPhoto(msg.chat.id,photo,{
       caption:msgTemplate
@@ -44,7 +46,7 @@ bot.onText(/([0-9]{10})/,(msg,match)=>{
     )
   }
   else{
-    const errorMsg = `${test.error.split(".")[0]}. The PNR is invalid or may have been expired`;
+    const errorMsg = ` The PNR is invalid or may have been expired`;
     const photo = path.join(process.cwd()+'/static/oops.png')
     bot.sendPhoto(msg.chat.id,photo,{
       caption:errorMsg
@@ -54,3 +56,7 @@ bot.onText(/([0-9]{10})/,(msg,match)=>{
   });
   
 });
+const port = process.env.PORT || 4000;
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
